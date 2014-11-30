@@ -1,0 +1,200 @@
+[
+  {
+    "name": "Ek_doc.csv",
+    "disabled": 1,
+    "table": "adm_docs",
+    "cols": {
+      "doc_date": "==doc_date",
+      "doc_active_date": "==doc_act",
+      "state_gazette_publ": "==dv_danni",
+      "doc_number": "==doc_num",
+      "state_gazette_date": "==dv_date",
+      "ekatte_id": "==document",
+      "doc_institution": "==doc_inst",
+      "doc_type": "==doc_kind",
+      "doc_name": "==doc_name"
+    }
+  },
+  {
+    "disabled": 0,
+    "table": "adm_units",
+    "cols": {
+      "adm_type_id": 7,
+      "name": "==name",
+      "doc_id": {
+        "field": "id",
+        "table": "adm_docs",
+        "where": [
+          [
+            "doc_number",
+            "==document"
+          ]
+        ]
+      },
+      "ekatte_name": "==region"
+    },
+    "name": "Ek_reg1.csv"
+  },
+  {
+    "table": "adm_units",
+    "disabled": 0,
+    "cols": {
+      "name": "==name",
+      "adm_type_id": 6,
+      "ekatte_name": "==region",
+      "doc_id": {
+        "field": "id",
+        "table": "adm_docs",
+        "where": [
+          [
+            "doc_number",
+            "==document"
+          ]
+        ]
+      }
+    },
+    "name": "Ek_reg2.csv"
+  },
+  {
+    "name": "Ek_obl.csv",
+    "table": "adm_units",
+    "disabled": 0,
+    "cols": {
+      "ekatte_name": "==oblast",
+      "doc_id": {
+        "where": [
+          [
+            "doc_number",
+            "==document"
+          ]
+        ],
+        "table": "adm_docs",
+        "field": "id"
+      },
+      "name": "==name",
+      "parent_id": {
+        "where": [
+          [
+            "ekatte_name",
+            "==region"
+          ]
+        ],
+        "table": "adm_units",
+        "field": "id"
+      },
+      "ekatte": "==ekatte",
+      "adm_type_id": 5
+    }
+  },
+  {
+    "cols": {
+      "name": "==name",
+      "ekatte_category": "==category",
+      "parent_id": {
+        "where": [
+          [
+            "ekatte_name",
+            {
+              "col": "==obstina",
+              "pattern": "([A-Z][A-Z][A-Z])"
+            }
+          ]
+        ],
+        "field": "id",
+        "table": "adm_units"
+      },
+      "ekatte": "==ekatte",
+      "adm_type_id": 4,
+      "ekatte_name": "==obstina",
+      "doc_id": {
+        "table": "adm_docs",
+        "field": "id",
+        "where": [
+          [
+            "doc_number",
+            "==document"
+          ]
+        ]
+      }
+    },
+    "table": "adm_units",
+    "disabled": 0,
+    "name": "Ek_obst.csv"
+  },
+  {
+    "cols": {
+      "name": "==name",
+      "parent_id": {
+        "where": [
+          [
+            "ekatte_name",
+            {
+              "pattern": "([A-Z]{3}[0-9]+)-",
+              "col": "==kmetstvo"
+            }
+          ]
+        ],
+        "field": "id",
+        "table": "adm_units"
+      },
+      "ekatte": "==ekatte",
+      "ekatte_category": "==category",
+      "adm_type_id": 9,
+      "ekatte_name": "==kmetstvo",
+      "doc_id": {
+        "where": [
+          [
+            "doc_number",
+            "==document"
+          ]
+        ],
+        "table": "adm_docs",
+        "field": "id"
+      }
+    },
+    "table": "adm_units",
+    "disabled": 0,
+    "name": "Ek_kmet.csv"
+  },
+  {
+    "name": "Ek_atte.csv",
+    "disabled": 0,
+    "skip_rows": 1,
+    "table": "adm_units",
+    "cols": {
+      "doc_id": {
+        "where": [
+          [
+            "doc_number",
+            "==document"
+          ]
+        ],
+        "field": "id",
+        "table": "adm_docs"
+      },
+      "ekatte_category": "==category",
+      "parent_id": {
+        "field": "id",
+        "table": "adm_units",
+        "required": 1,
+        "where": [
+          [
+            "ekatte_name",
+            "==kmetstvo"
+          ],
+          [
+            "ekatte_name",
+            "==obstina",
+            null,
+            "OR"
+          ]
+
+        ]
+      },
+      "ekatte_altitude": "==altitude",
+      "ekatte": "==ekatte",
+      "name": "==name",
+      "adm_type_id": "==kind"
+    }
+  }
+]
