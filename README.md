@@ -1,6 +1,6 @@
 # ekatte2sql
 
-ekatte2sql е срипт, който превръща информацията на Национален статистически институт (НСИ) от xls файлове в sql база данни.
+ekatte2sql е срипт, който превръща информацията на Национален статистически институт (НСИ) от xls файлове в sql база данни. 
 
 ### Описание
 Всъщност скриптовете са два:
@@ -43,14 +43,15 @@ ekatte2sql е срипт, който превръща информацията �
 8. Готови сме!
 
 
-    mkdir ~/project-ekatte
-    git clone https://github.com/suricactus/ekatte2psql
-    cd ekatte2psql
-    chmod +x execute.sh
-    # sql database magic here!
-    ./execute.sh -u $DB_USERNAME -p $DB_PASSWORD 
-    echo "Such script, very wow"
-
+```sh
+mkdir ~/project-ekatte
+git clone https://github.com/suricactus/ekatte2psql
+cd ekatte2psql
+chmod +x execute.sh
+# sql database magic here!
+./execute.sh -u $DB_USERNAME -p $DB_PASSWORD 
+echo "Such script, very wow"
+```
 
 ## Документация
 И двата скрипта поддържат набор от CLI аргументи:
