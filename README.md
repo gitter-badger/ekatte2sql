@@ -44,13 +44,13 @@ ekatte2sql е срипт, който превръща информацията �
 
 
 ```sh
-mkdir ~/project-ekatte
-git clone https://github.com/suricactus/ekatte2psql
-cd ekatte2psql
-chmod +x execute.sh
-# sql database magic here!
-./execute.sh -u $DB_USERNAME -p $DB_PASSWORD 
-echo "Such script, very wow"
+$ mkdir ~/project-ekatte
+$ git clone https://github.com/suricactus/ekatte2psql
+$ cd ekatte2psql
+$ chmod +x execute.sh
+$ # sql database magic here!
+$ ./execute.sh -u $DB_USERNAME -p $DB_PASSWORD 
+$ echo "Such script, very wow"
 ```
 
 ## Документация
@@ -73,5 +73,11 @@ echo "Such script, very wow"
 - `--input-dir` - директория, в която да се търсят електронните таблици (spreadsheets);
 - `--input-file` - файл, в който е описана връзката между електронната таблица и таблицата в базата данни;
 
+
+## TODOs
+- Трябва да се документира формата на schema файла;
+
+
 ## Лиценз
+Само не го затваряйте. И да, отворете си настоящия код :)
 GPL 2.0
