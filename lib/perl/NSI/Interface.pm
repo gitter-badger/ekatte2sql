@@ -90,12 +90,6 @@ sub ParseTable($$)
             # skip cols if needed
             next if ((defined $$self{skip_cols}) && ($cell_index++ < $$self{skip_cols}));
 
-            if (defined $cell->children('a'))
-            {
-                print 2;
-            }
-
-
             push @{ $table_row }, $cell->all_text; 
         }
 
