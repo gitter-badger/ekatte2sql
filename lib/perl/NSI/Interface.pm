@@ -203,30 +203,46 @@ sub ParseSmartCol($$)
     return $result;
 }
 
+# # Ако сайта на НСИ поддържаше някаква конкурентност, а не даваше 502 при едва 28 заявки в 4:37 сутринта, нямаше да е зле
+# sub RequestEKATTE($$)
+# {
+#     my ($self, $params) = @_;
+#     my $url = $self->BuildURL($params);
+#     my $dfd = deferred;
 
+#     http_get $url => sub {
+#         my ( $body, $headers ) = @_;
+
+#         return ($headers->{Status} >= 200 && $headers->{Status} < 300)
+#             ? $dfd->resolve( $body )
+#             : $dfd->reject('receiving data failed with status: '.  $headers->{Status} );
+#     };
+
+#     return $dfd->promise;
+# }
+
+# Надявам се с последователни заявки на НСИ няма да им се завие свят, както при конкурентните
 sub RequestEKATTE($$)
 {
     my ($self, $params) = @_;
     my $url = $self->BuildURL($params);
-    my $d = deferred;
+    my $dfd = deferred;
 
-    http_get $url => sub {
-        my ( $body, $headers ) = @_;
-        return ($headers->{Status} >= 200 && $headers->{Status} < 300)
-            ? $d->resolve( $body )
-            : $d->reject('receiving data failed with status: '.  $headers->{Status} );
-    };
 
-    return $d->promise;
+    my ( $body, $headers ) = get ($url);
+
+
+    $dfd->resolve( $body );
+
+
+    return $dfd->promise;   
 }
 
-
-sub RequestEKATTE($$)
+sub Request($$)
 {
     my ($self, $params, $hash_parse) = @_;
-    my $req = $self->wget($params);
-
-    $req->then(sub {
+    my $req = $self->RequestEKATTE($params)
+        ->then(sub {
             my ($html) = @_;
             my $table;
 
@@ -238,7 +254,6 @@ sub RequestEKATTE($$)
             {
                 $table = $self->ParseTableToHash($html);
             }
-            
 
             return $table;
         });
