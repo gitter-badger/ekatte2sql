@@ -10,6 +10,10 @@ use Mojo::DOM;
 use LWP::Simple;
 
 
+use AnyEvent::HTTP;
+use AnyEvent::Promises qw(deferred merge_promises);
+
+
 use constant {
     EKATTE_URL => "http://www.nsi.bg/nrnm/index.php",
 };
@@ -210,32 +214,42 @@ sub RequestEKATTE($$)
 {
     my ($self, $params) = @_;
     my $url = $self->BuildURL($params);
+    my $d = deferred;
 
-    $$self{html} = get($url);
+    http_get $url => sub {
+        my ( $body, $headers ) = @_;
+        return ($headers->{Status} >= 200 && $headers->{Status} < 300)
+            ? $d->resolve( $body )
+            : $d->reject('receiving data failed with status: '.  $headers->{Status} );
+    };
 
-
-    return $$self{html};
+    return $d->promise;
 }
 
 
-sub Request($$)
+sub RequestEKATTE($$)
 {
     my ($self, $params, $hash_parse) = @_;
-    my $html = $self->RequestEKATTE($params);
-    my $table;
+    my $req = $self->wget($params);
 
+    $req->then(sub {
+            my ($html) = @_;
+            my $table;
 
-    if ($hash_parse)
-    {
-        $table = $self->ParseTable($html);
-    }
-    else
-    {
-        $table = $self->ParseTableToHash($html);
-    }
+            if ($hash_parse)
+            {
+                $table = $self->ParseTable($html);
+            }
+            else
+            {
+                $table = $self->ParseTableToHash($html);
+            }
+            
 
+            return $table;
+        });
 
-    return $table;
+    return $req;
 }
 
 sub BuildURL($$)
@@ -255,6 +269,7 @@ sub BuildURL($$)
 
     return $url;
 }
+
 sub ParseURI($$)
 {
     my ($self, $uri) = @_;
@@ -263,6 +278,7 @@ sub ParseURI($$)
     
     return $uri;
 }
+
 sub ParseQueryParams($$)
 {
     my ($self, $uri) = @_;
