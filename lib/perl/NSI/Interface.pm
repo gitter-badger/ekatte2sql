@@ -35,6 +35,8 @@ sub new {
             { type => "municipality", text => "общ."},
             { type => "province", text => "обл."},
         ],
+        table_header => [qw(number ekatte_name name)],
+
 
         %{ $options }
 
@@ -107,7 +109,6 @@ sub ParseTableToHash($$)
     my ($self, $html) = @_;
     my $result = $self->GetTableFromHtml($html);
     my $table = [];
-    my $table_header = [qw(number ekatte_name name)];
 
     my $row_index;
     for my $row ($result->find('tr')->each)   
@@ -124,7 +125,7 @@ sub ParseTableToHash($$)
             # skip cols if needed
             next if (($cell_index++ < $$self{skip_cols}) && (defined $$self{skip_cols}));
 
-            my $table_header_col = $$table_header[$cell_index - $$self{skip_cols} - 1];
+            my $table_header_col = $$self{table_header}[$cell_index - $$self{skip_cols} - 1];
 
 
             $$table_row{$table_header_col} = $cell->all_text;
@@ -228,7 +229,7 @@ sub RequestEKATTE($$)
     my $url = $self->BuildURL($params);
     my $dfd = deferred;
 
-
+    print STDERR "REQUEST: $url\n";
     my ( $body, $headers ) = get ($url);
 
 
@@ -293,7 +294,7 @@ sub ParseQueryParams($$)
     my ($self, $uri) = @_;
     my $query_params = {};
 
-    $uri =~ s/.*\?(.*)/$1/g;
+    $uri =~ s/(.*\?)?(.*)/$2/g;
     my @query_string = split '&', $uri;
 
     for my $query_string_param (@query_string)
