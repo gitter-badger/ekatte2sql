@@ -242,7 +242,8 @@ sub RequestEKATTE($$)
 sub Request($$)
 {
     my ($self, $params, $hash_parse) = @_;
-    my $req = $self->RequestEKATTE($params)
+    
+    return $self->RequestEKATTE($params)
         ->then(sub {
             my ($html) = @_;
             my $table;
@@ -258,8 +259,6 @@ sub Request($$)
 
             return $table;
         });
-
-    return $req;
 }
 
 sub BuildURL($$)
