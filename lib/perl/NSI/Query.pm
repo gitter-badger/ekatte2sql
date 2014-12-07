@@ -44,16 +44,14 @@ sub GetTreeOfProvinces($$)
 
 				@result = (@result, @{ $provinces });
 
-				$provinces = [$$provinces[5]]; #TODO delete
-
 				$self->GetTreeOfMunicipalities($date, $provinces)
 						->then(sub {
 							my ($municipalities) = @_;
 
-							print STDERR '!!!!!!!!';
 
 							@result = (@result, @{ $municipalities });
 							
+
 							$dfd->resolve ( \@result );
 						});
 			});
@@ -75,8 +73,6 @@ sub GetTreeOfMunicipalities($$$)
 		->then(sub {
 			my ($municipalities) = @_;
 
-			$municipalities = [$$municipalities[5]]; #TODO delete
-
 			@result = (@result, @{ $municipalities });
 
 			return $self->GetTreeOfCouncils($date, $municipalities)
@@ -90,6 +86,7 @@ sub GetTreeOfMunicipalities($$$)
 					{
 						$undirect_settlements{$$councils_child{ekatte_name}} = 1 if $$councils_child{TYPE} eq 'settlement';
 					}
+
 
 					return $self->GetSettlements($date, $municipalities, !!0)
 						->then(sub {
@@ -141,10 +138,12 @@ sub GetProvinces($$)
 	my ($self, $date) = @_;
 	my $dfd = deferred;
 
+	$date //= `date -Idate`;
+
 	# Тази заявка взима всички области към даден период
 	my $req = $self->Request({
 		f => 3, 
-		date => "04.12.2014", 
+		date => $date, 
 		hierarchy=> 5,
 	})
 		->then(sub {
@@ -152,7 +151,6 @@ sub GetProvinces($$)
 
 			for my $row (@{ $provinces })
 			{
-				# print STDERR Dumper ;
 				$$row{TYPE} = "province";		
 				print STDERR "Province $$row{name}\n";
 			}
@@ -172,6 +170,7 @@ sub GetMunicipalities($$$)
 	my $municipalities = [];
 	my @requests;
 
+	$date //= `date -Idate`;
 
 	if (not defined $provinces)
 	{
@@ -195,14 +194,18 @@ sub GetMunicipalities($$$)
 				{
 					print STDERR "Get municipalities: ";
 					my $href = $$province{HREFS}{$href_key};
-					my $uri = $self->ParseURI($href);
-					my $req = $self->Request($uri)
+					my $query_params = $self->ParseQueryParams( $self->ParseURI($href) );
+					
+					$$query_params{date} = $self->ParseDate( $date );
+
+					my $req = $self->Request($query_params)
 						->then(sub {
 								my ($table) = @_;
 
 								for my $row (@{ $table })
 								{
-									$$row{TYPE} = "municipality";				
+									$$row{TYPE} = "municipality";		
+									$$row{PARENT} = $$province{ekatte_name};		
 									print STDERR "Municipality $$row{name}\n";
 								}
 
@@ -231,7 +234,8 @@ sub GetCouncils($$$)
 	my $councils = [];
 	my @requests;
 
-	
+	$date //= `date -Idate`;
+
 	if (not defined $municipalities)
 	{
 		$self->GetMunicipalities($date)
@@ -255,18 +259,21 @@ sub GetCouncils($$$)
 					print STDERR "Get councils: ";
 
 					my $href = $$municipality{HREFS}{$href_key};
-					my $uri = $self->ParseURI($href);
-					my $req = $self->Request($uri)
+					my $query_params = $self->ParseQueryParams( $self->ParseURI($href) );
+					
+					$$query_params{date} = $self->ParseDate( $date );
+
+					my $req = $self->Request($query_params)
 						->then(sub {
 								my ($table) = @_;
 
 								for my $row (@{ $table })
 								{
-									$$row{TYPE} = "councils";
+									$$row{TYPE} = "council";
+									$$row{PARENT} = $$municipality{ekatte_name};
 									print STDERR "Council $$row{name}\n";
+									push @{ $councils }, $row;
 								}
-
-								$councils = [@{ $councils }, @{ $table }];
 							});
 
 					push @requests, $req;
@@ -288,6 +295,7 @@ sub GetSettlements($$$$)
 	my $settlements = [];
 	my @requests;
 
+	$date //= `date -Idate`;
 
 	if (not defined $parents)
 	{
@@ -309,24 +317,24 @@ sub GetSettlements($$$$)
 			{
 				if ($href_key == 'name')
 				{
-					print STDERR "Get settlements by ", (($by_council) ? "council" : "municipality"), ": ";
+					print STDERR "Get settlements by ", (($by_council) ? "council" : "municipality"), ":\n";
 					my $href = $$parent{HREFS}{$href_key};
-					my $uri = $self->ParseURI($href);
-					my $query_params = $self->ParseQueryParams($uri);
+					my $query_params = $self->ParseQueryParams( $self->ParseURI($href) );
 
-					$$query_params{hierarchy} = Q_PARAM_HIERARCHY_MUNICIPALITY;
-
-					my $req = $self->Request($uri)
+					$$query_params{hierarchy} = Q_PARAM_HIERARCHY_MUNICIPALITY if not $by_council;
+					$$query_params{date} = $self->ParseDate( $date );
+					
+					my $req = $self->Request($query_params)
 						->then(sub {
 								my ($table) = @_;
 
 								for my $row (@{ $table })
 								{
 									$$row{TYPE} = "settlement";
+									$$row{PARENT} = $$parent{ekatte_name};
 									print STDERR "Settlement $$row{name}\n";	
+									push @{ $settlements }, $row;
 								}
-
-								push @{ $settlements }, $table;
 							});
 
 					push @requests, $req;
@@ -346,8 +354,10 @@ sub ParseDate($$)
 	my ($self, $date) = @_;
 
 	$date =~ s/(\d{4})-(\d{2})-(\d{2})/$3.$2.$1/g;
+	$date =~ s/^\s+|\s+$//g;
 
 	return $date;
 }
+
 
 1;
