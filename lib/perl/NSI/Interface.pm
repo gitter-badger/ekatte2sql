@@ -32,6 +32,7 @@ sub new {
             { type => "monastery", text => "ман." },
             { type => "village", text => "с."},
             { type => "city", text => "гр."},
+            { type => "council", text => "кметство"},
             { type => "municipality", text => "общ."},
             { type => "province", text => "обл."},
         ],
@@ -188,7 +189,6 @@ sub ParseSmartCol($$)
         $unit =~ s/^\s+|\s+$//g;
         
 
-        # for my $unitss (@units){}
         for my $type (@{ $types })
         {
             my $match = quotemeta $$type{text};
@@ -296,6 +296,7 @@ sub ParseQueryParams($$)
     $uri =~ s/(.*\?)?(.*)/$2/g;
     my @query_string = split '&', $uri;
 
+
     for my $query_string_param (@query_string)
     {
         my @key_value = split '=', $query_string_param;
@@ -305,5 +306,6 @@ sub ParseQueryParams($$)
 
     return $query_params;
 }
+
 
 1;
