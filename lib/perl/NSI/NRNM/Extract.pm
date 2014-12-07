@@ -1,4 +1,4 @@
-package NSI::Query;
+package NSI::NRNM::Extract;
 
 use utf8;
 use strict;
@@ -9,11 +9,11 @@ use AnyEvent::HTTP;
 use AnyEvent::Promises qw(deferred merge_promises);
 
 
-use lib ('/home/suricactus/work/ekatte2sql/lib/perl');
-use NSI::Interface;
+use lib ('.');
+use NSI::NRNM::Interface;
 
 
-use base 'NSI::Interface';
+use base 'NSI::NRNM::Interface';
 
 
 use constant Q_PARAM_HIERARCHY_MUNICIPALITY => 1;
@@ -40,21 +40,21 @@ sub GetTreeOfProvinces($$)
 
     $self->GetProvinces($date)
         ->then(sub {
-                my ($provinces) = @_;
+            my ($provinces) = @_;
 
-                @result = (@result, @{ $provinces });
+            @result = (@result, @{ $provinces });
 
-                $self->GetTreeOfMunicipalities($date, $provinces)
-                        ->then(sub {
-                            my ($municipalities) = @_;
+            $self->GetTreeOfMunicipalities($date, $provinces)
+                ->then(sub {
+                    my ($municipalities) = @_;
 
 
-                            @result = (@result, @{ $municipalities });
-                            
+                    @result = (@result, @{ $municipalities });
+                    
 
-                            $dfd->resolve ( \@result );
-                        });
-            });
+                    $dfd->resolve ( \@result );
+                });
+        });
 
 
     return $dfd->promise;

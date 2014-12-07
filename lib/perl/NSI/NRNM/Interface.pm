@@ -1,4 +1,4 @@
-package NSI::Interface;
+package NSI::NRNM::Interface;
 
 use utf8;
 use strict;

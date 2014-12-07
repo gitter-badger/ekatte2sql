@@ -13,7 +13,7 @@ use AnyEvent;
 
 
 use lib ('./lib/perl');
-use NSI::Query;
+use NSI::NRNM::Extract;
 
 
 binmode STDIN, ':utf8';
@@ -37,7 +37,7 @@ print STDERR "Requesting for date $$ARGS{date}";
 
 
 my $condvar = AnyEvent->condvar;
-my $nsiq = new NSI::Query({
+my $nsiq = new NSI::NRNM::Extract({
 	skip_rows => 2
 	});
 
