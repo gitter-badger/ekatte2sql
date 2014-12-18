@@ -145,7 +145,7 @@ sub GetProvinces($$)
         f => 3, 
         date => $date, 
         hierarchy=> 5,
-    })
+    }, !0)
         ->then(sub {
             my ($provinces) = @_;
 
@@ -186,6 +186,8 @@ sub GetMunicipalities($$$)
     return $dfd->promise->then(sub {
         my ($provinces) = @_;
 
+        # $provinces = [$$provinces[$#{$provinces}]]; # DEBUG
+
         for my $province (@{ $provinces })
         {
             for my $href_key (keys %{ $$province{HREFS} })
@@ -198,7 +200,7 @@ sub GetMunicipalities($$$)
                     
                     $$query_params{date} = $self->ParseDate( $date );
 
-                    my $req = $self->Request($query_params)
+                    my $req = $self->Request($query_params, !0)
                         ->then(sub {
                                 my ($table) = @_;
 
@@ -263,7 +265,7 @@ sub GetCouncils($$$)
                     
                     $$query_params{date} = $self->ParseDate( $date );
 
-                    my $req = $self->Request($query_params)
+                    my $req = $self->Request($query_params, !0)
                         ->then(sub {
                                 my ($table) = @_;
 
@@ -324,13 +326,21 @@ sub GetSettlements($$$$)
                     $$query_params{hierarchy} = Q_PARAM_HIERARCHY_MUNICIPALITY if not $by_council;
                     $$query_params{date} = $self->ParseDate( $date );
                     
-                    my $req = $self->Request($query_params)
+                    my $req = $self->Request($query_params, !0)
                         ->then(sub {
                                 my ($table) = @_;
 
                                 for my $row (@{ $table })
                                 {
-                                    $$row{TYPE} = "settlement";
+                                    for my $guess_type (qw{monastery village city})
+                                    {
+                                        if(defined $$row{$guess_type})
+                                        {
+                                            $$row{TYPE} = $guess_type;
+                                            last;
+                                        }
+                                    }
+                                                                                
                                     $$row{PARENT} = $$parent{ekatte_name};
                                     print STDERR "Settlement $$row{name}\n";    
                                     push @{ $settlements }, $row;
