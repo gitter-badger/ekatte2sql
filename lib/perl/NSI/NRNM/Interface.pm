@@ -58,12 +58,14 @@ sub GetTableFromHtml($$)
     
     # parse html to perl object    
     my $dom = Mojo::DOM->new($html);
-    my $result = $dom->at('.restitle');
+    my $result = $dom->at('.cmid');
+
+    $result = $dom->at('.mid') unless defined $result;
 
     # find nearest table
     while(1)
     {
-        $result = $result->next;
+        $result = $result->parent;
         last if (defined $result) && ($result->type eq "table");
     }
 
@@ -79,6 +81,7 @@ sub ParseTable($$)
 
 
     my $row_index;
+
     for my $row ($result->find('tr')->each)   
     {
         # skip rows if needed
@@ -100,16 +103,17 @@ sub ParseTable($$)
         push @{ $table }, $table_row;
     }
 
-
     return $table;
 }
 
 
-sub ParseTableToHash($$)
+sub ParseTableToHash($$$)
 {
-    my ($self, $html) = @_;
-    my $result = $self->GetTableFromHtml($html);
+    my ($self, $html, $table_header) = @_;
+    my $result = $self->GetTableFromHtml($html);    
     my $table = [];
+
+    $table_header = $$self{table_header} unless (ref $table_header eq "ARRAY");
 
     my $row_index;
     for my $row ($result->find('tr')->each)   
@@ -126,7 +130,7 @@ sub ParseTableToHash($$)
             # skip cols if needed
             next if (($cell_index++ < $$self{skip_cols}) && (defined $$self{skip_cols}));
 
-            my $table_header_col = $$self{table_header}[$cell_index - $$self{skip_cols} - 1];
+            my $table_header_col = $$table_header[$cell_index - $$self{skip_cols} - 1];
 
 
             $$table_row{$table_header_col} = $cell->all_text;
@@ -196,6 +200,7 @@ sub ParseSmartCol($$)
             if($unit =~ /^$match/i)
             {
                 $unit =~ s/^$match//g;
+                $unit =~ s/^\s+|\s+$//g;
                 $$result{$$type{type}} = $unit;
             }
         }
@@ -232,14 +237,13 @@ sub RequestEKATTE($$)
     print STDERR "REQUEST: $url\n";
     my ( $body, $headers ) = get ($url);
 
-
     $dfd->resolve( $body );
 
 
     return $dfd->promise;   
 }
 
-sub Request($$)
+sub Request($$$)
 {
     my ($self, $params, $hash_parse) = @_;
     
@@ -250,11 +254,11 @@ sub Request($$)
 
             if ($hash_parse)
             {
-                $table = $self->ParseTable($html);
+                $table = $self->ParseTableToHash($html, $hash_parse);
             }
             else
             {
-                $table = $self->ParseTableToHash($html);
+                $table = $self->ParseTable($html);
             }
 
             return $table;
@@ -272,7 +276,17 @@ sub BuildURL($$)
     }
     else
     {
-        $url .= "?$params";
+        $url = $url->as_string;
+
+        if($params =~ /.*\.php\?(.*=.*)(&.*=.*)*/g)
+        {
+            $url =~ s/(.*\/)(.*\.php)/$1/;
+            $url .= $params;
+        }
+        else
+        {
+            $url .= "?$params";
+        }
     }
 
 
@@ -283,7 +297,7 @@ sub ParseURI($$)
 {
     my ($self, $uri) = @_;
 
-    $uri =~ s/.*\?(.*)/$1/g;
+    $uri =~ s/(\.bg)?.*\/(.*\.php)\?(.*)/$2?$3/g;
     
     return $uri;
 }
