@@ -115,11 +115,15 @@ sub ParseTableToHash($$$)
 
     $table_header = $$self{table_header} unless (ref $table_header eq "ARRAY");
 
+    my $prev_row_count_cells;
     my $row_index;
     for my $row ($result->find('tr')->each)   
     {
         # skip rows if needed
         next if ((defined $$self{skip_rows}) && ($row_index++ < $$self{skip_rows}));
+        last if defined $prev_row_count_cells && $row->find('td')->size != $prev_row_count_cells;
+        
+        $prev_row_count_cells = $row->find('td')->size;
 
         my $table_row = {};
 
