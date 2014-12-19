@@ -87,6 +87,7 @@ sub ParsePopulationByYear($$)
         my $date = $$row{date};
         $date =~ s/(\d{2}).(\d{2}).(\d{4})/$3-$2-$1/;
         $$result{ $date } = $row;
+        $$row{date} = $date;
     }                        
         
     return $result;
