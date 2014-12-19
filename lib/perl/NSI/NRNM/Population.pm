@@ -35,7 +35,7 @@ sub GetPopulation($$)
     $self->Request({
         ezik => "bul",
         f => 9,
-        search => 63427,
+        search => $ekatte,
     }, !0)
         ->then(sub {
             my ($cities) = @_;
