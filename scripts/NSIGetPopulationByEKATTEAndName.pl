@@ -13,7 +13,7 @@ use AnyEvent;
 
 
 use lib ('./lib/perl');
-use NSI::NRNM::Population;
+use GeoStats::NSI::NRNM::Population;
 
 
 binmode STDIN, ':utf8';
@@ -32,7 +32,7 @@ GetOptions(
 
 
 my $condvar = AnyEvent->condvar;
-my $nsiq = new NSI::NRNM::Population({
+my $nsiq = new GeoStats::NSI::NRNM::Population({
 	skip_rows => 2
 	});
 

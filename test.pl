@@ -13,7 +13,7 @@ use AnyEvent;
 
 
 use lib ('./lib/perl');
-use NSI::Query;
+use GeoStats::NSI::Query;
 
 
 binmode STDIN, ':utf8';
@@ -35,7 +35,7 @@ $$ARGS{date} = $$ARGS{date} || `date -Idate`;
 
 
 my $condvar = AnyEvent->condvar;
-my $nsiq = new NSI::Query({
+my $nsiq = new GeoStats::NSI::Query({
 	skip_rows => 2
 	});
 

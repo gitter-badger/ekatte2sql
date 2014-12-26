@@ -12,7 +12,7 @@ use File::Basename;
 
 
 use lib ('./lib/perl');
-use DataManager::Base;
+use GeoStats::DataManager::Base;
 
 # WARNING - using unique key on multiple rows has some unexpected consequences like lost data
 my $ARGS = {
@@ -47,7 +47,7 @@ for my $file (@files)
     my $dbh = DBI->connect("DBI:XBase:$path", {
          RaiseError => 1,
     });
-    my $dmb = new DataManager::Base({
+    my $dmb = new GeoStats::DataManager::Base({
         dbh => $dbh,
         quote_identifiers => !!0,
     });

@@ -13,7 +13,7 @@ use AnyEvent;
 
 
 use lib ('./lib/perl');
-use NSI::NRNM::Extract;
+use GeoStats::NSI::NRNM::Extract;
 
 
 binmode STDIN, ':utf8';
@@ -37,7 +37,7 @@ print STDERR "Requesting for date $$ARGS{date}";
 
 
 my $condvar = AnyEvent->condvar;
-my $nsiq = new NSI::NRNM::Extract({
+my $nsiq = new GeoStats::NSI::NRNM::Extract({
 	skip_rows => 2
 	});
 

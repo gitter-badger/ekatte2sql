@@ -14,8 +14,8 @@ use AnyEvent;
 
 
 use lib ('./lib/perl');
-use DataManager::Stats;
-use NSI::NRNM::Population;
+use GeoStats::DataManager::Stats;
+use GeoStats::NSI::NRNM::Population;
 
 
 
@@ -39,12 +39,12 @@ my $dbh = DBI->connect($dbh_config, $$config{db}{user}, $$config{db}{pass}, {
  }) or die $DBI::errstr;
 
 
-my $dm_stats = new DataManager::Stats({
+my $dm_stats = new GeoStats::DataManager::Stats({
 		dbh => $dbh,
 		adm_types => $$config{adm_types}
 	});
 
-my $nrnm_pop = new NSI::NRNM::Population({
+my $nrnm_pop = new GeoStats::NSI::NRNM::Population({
 	skip_rows => 2
 });
 

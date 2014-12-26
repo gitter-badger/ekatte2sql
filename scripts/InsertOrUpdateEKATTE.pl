@@ -14,7 +14,7 @@ use AnyEvent;
 
 
 use lib ('./lib/perl');
-use DataManager::AdmUnits;
+use GeoStats::DataManager::AdmUnits;
 
 
 
@@ -60,7 +60,7 @@ my $dbh = DBI->connect($dbh_config, $$config{db}{user}, $$config{db}{pass}, {
  }) or die $DBI::errstr;
 
 
-my $dm_adm_units = new DataManager::AdmUnits({
+my $dm_adm_units = new GeoStats::DataManager::AdmUnits({
 		dbh => $dbh,
 		adm_types => $$config{adm_types},
 	});
