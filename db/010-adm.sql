@@ -54,7 +54,7 @@ create table adm_units (
     ekatte_category int,
     ekatte_altitude int,
     name text not null,
-    transl_name text
+    int_name text not null
 );
 
 
