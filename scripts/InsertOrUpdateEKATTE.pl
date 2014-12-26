@@ -7,8 +7,8 @@ use Data::Dumper;
 
 use JSON;
 use Getopt::Long;
+use Config::Any;
 use DBI;
-
 
 use AnyEvent;
 
@@ -17,16 +17,11 @@ use lib ('./lib/perl');
 use DataManager::AdmUnits;
 
 
-use constant {
-	ADM_TYPE_EU_REGION => 7,
-	ADM_TYPE_REGION => 6,
-	ADM_TYPE_PROVINCE => 5,
-	ADM_TYPE_MUNICIPALITY => 4,
-	ADM_TYPE_COUNCIL => 9,
-	ADM_TYPE_CITY => 3,
-	ADM_TYPE_MONASTERY => 2,
-	ADM_TYPE_VILLAGE => 1,
-};
+
+my @filepaths = ('config/config.yml');
+my $config = Config::Any->load_files({ files => \@filepaths, use_ext => !0, flatten_to_hash => !0 });
+$config = $$config{'config/config.yml'};
+
 
 
 binmode STDIN, ':utf8';
@@ -36,24 +31,13 @@ binmode STDERR, ':utf8';
 
 my $ARGS = {
 	'filename' => undef,
-	'db_driver' => 'Pg',
-	'db_name' => undef,
-	'db_user' => undef,
-	'db_pass' => undef,
-	'db_host' => 'localhost',
 };
 
 
 GetOptions( 
     "filename=s" => \$$ARGS{filename}, 
-    "db-driver=s" => \$$ARGS{db_driver}, 
-    "db-name=s" => \$$ARGS{db_name},
-    "db-user=s" => \$$ARGS{db_user},
-    "db-pass=s" => \$$ARGS{db_pass},
-    "db-host=s" => \$$ARGS{db_host},
 );
 
-$$ARGS{db_driver} = "Pg" if $$ARGS{db_driver} =~ /pg|postgres|psql|postgresql/gi;
 
 
 my $json_text = do {
@@ -68,9 +52,9 @@ my $json = JSON->new;
 my $data = $json->decode($json_text);
 
 
-my $dbh_config = "DBI:$$ARGS{db_driver}:dbname=$$ARGS{db_name};host=$$ARGS{db_host}";
+my $dbh_config = "DBI:$$config{db}{driver}:dbname=$$config{db}{name};host=$$config{db}{host}";
 print "Opening db handler: \"$dbh_config\"\n";
-my $dbh = DBI->connect($dbh_config, $$ARGS{db_user}, $$ARGS{db_pass}, {
+my $dbh = DBI->connect($dbh_config, $$config{db}{user}, $$config{db}{pass}, {
      AutoCommit => 0,
      RaiseError => 1,
  }) or die $DBI::errstr;
@@ -78,22 +62,15 @@ my $dbh = DBI->connect($dbh_config, $$ARGS{db_user}, $$ARGS{db_pass}, {
 
 my $dm_adm_units = new DataManager::AdmUnits({
 		dbh => $dbh,
-		adm_types => {
-			eu_region => ADM_TYPE_EU_REGION,
-			region => ADM_TYPE_REGION,
-			province => ADM_TYPE_PROVINCE,
-			municipality => ADM_TYPE_MUNICIPALITY,
-			council => ADM_TYPE_COUNCIL,
-			village => ADM_TYPE_VILLAGE,
-			monastery => ADM_TYPE_MONASTERY,
-			city => ADM_TYPE_CITY,
-		}
+		adm_types => $$config{adm_types},
 	});
 
 
 for my $unit ( @{$data} )
 {
-	$dm_adm_units->CreateOrUpdateAdmUnitByEKATTE($unit);	
-	# print Dumper $unit;	
+	$dm_adm_units->CreateOrUpdateAdmUnitByEKATTE($unit);
+
+	$dbh->commit;	
 }
-print 1111111111100;
+
+print "Insert or update finished\n";
