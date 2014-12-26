@@ -58,3 +58,14 @@ create table adm_units (
 );
 
 
+CREATE RECURSIVE VIEW adm_units_tree_by_id (id, ancestors, depth, cycle) AS (
+    SELECT id, '{}'::integer[], 0, FALSE
+    FROM adm_units 
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT
+      n.id, t.ancestors || n.parent_id, t.depth + 1, n.parent_id = ANY(t.ancestors)
+    FROM adm_units n, adm_units_tree_by_id t
+    WHERE n.parent_id = t.id
+        AND NOT t.cycle
+);
