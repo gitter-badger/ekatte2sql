@@ -44,11 +44,13 @@ for my $file (@files)
     
     $filename = $filename . $suffix;
 
-    my $dbh = DBI->connect("DBI:XBase:$path");
+    my $dbh = DBI->connect("DBI:XBase:$path", {
+         RaiseError => 1,
+    });
     my $dmb = new DataManager::Base({
         dbh => $dbh,
         quote_identifiers => !!0,
-        });
+    });
 
     my $sth = $dbh->prepare("
 
