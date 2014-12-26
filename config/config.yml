@@ -1,0 +1,25 @@
+---
+db          :
+    driver  : "Pg"
+    name    : "ekatte"
+    user    : "api"
+    pass    : "123"
+    host    : "localhost"
+    port    : 997
+
+adm_types   :
+    council        : 9
+    country        : 8
+    eu_region      : 7
+    region         : 6
+    province       : 5
+    municipality   : 4
+    village        : 3
+    monastery      : 2
+    city           : 1
+
+organizations:
+    NSI     :    1
+
+indicators:
+    pop_total   : 1
